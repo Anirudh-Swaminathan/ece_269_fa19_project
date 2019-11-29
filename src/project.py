@@ -24,6 +24,8 @@ class EigenFaces(object):
         self.neutral_imgs = []
         self.smiling_imgs = []
         self.mean_img = None
+        self.dataset = []
+        self.image_size = None
 
     def load_data(self):
         """Function to load the data"""
@@ -32,6 +34,10 @@ class EigenFaces(object):
             simg = mpimg.imread(self.data_dir + str(i + 1) + "b.jpg")
             self.neutral_imgs.append(nimg)
             self.smiling_imgs.append(simg)
+        self.dataset = self.neutral_imgs[:190]
+        self.dataset = np.array(self.dataset)
+        self.image_size = (self.dataset.shape[1], self.dataset.shape[2])
+        self.dataset = self.dataset.reshape(self.dataset.shape[0], self.dataset.shape[1] * self.dataset.shape[2])
 
     def show_image(self, ind, mode="neutral"):
         """Function to show a random image"""
@@ -43,12 +49,22 @@ class EigenFaces(object):
             plt.imshow(self.smiling_imgs[ind], cmap="gray")
             plt.show()
 
+    def display_image(self, img):
+        """Generic function to display an image"""
+        plt.imshow(img, cmap="gray")
+        plt.show()
+
     def mean_image(self):
         """Calculate the mean image of a given neutral dataset"""
-        pass
+        num_imgs = self.dataset.shape[0]
+        # print(self.dataset.shape)
+        self.mean_img = np.matmul(np.transpose(self.dataset), np.ones((num_imgs, 1))) / num_imgs
+        self.mean_img = np.transpose(self.mean_img)
+        print(self.mean_img.shape)
 
     def pca(self):
-        pass
+        self.mean_image()
+        self.mean_offset = self.dataset - self.mean_img
 
 
 def main():
@@ -59,6 +75,9 @@ def main():
         j = random.randint(0, 199)
         efc.show_image(j)
         efc.show_image(j, "smiling")
+    efc.pca()
+    plot_mean_img = efc.mean_img.reshape(efc.image_size[0], efc.image_size[1])
+    efc.display_image(plot_mean_img)
 
 
 if __name__ == "__main__":
